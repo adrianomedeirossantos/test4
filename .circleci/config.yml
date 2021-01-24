@@ -1,0 +1,111 @@
+---
+version: 2
+
+gousto_build_image: &gousto_build_image
+  - image: ${AWS_ACCOUNT_NUMBER}.dkr.ecr.eu-west-1.amazonaws.com/${GOUSTO_ENVIRONMENT}/circleci-image/python37:latest
+    aws_auth:
+      aws_access_key_id: $AWS_ERC_ACCESS_KEY
+      aws_secret_access_key: $AWS_ERC_SECRET_KEY
+
+jobs:
+
+  install-dependencies:
+    docker: *gousto_build_image
+    steps:
+      - checkout
+      - run: /gousto/platform-setup.sh
+      - run: make ci-install
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project
+            - .circlerc
+  test:
+    docker: *gousto_build_image
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: make ci-test
+
+  lint:
+    docker: *gousto_build_image
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: make ci-lint
+
+  deploy:
+    docker: *gousto_build_image
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run: source ~/.circlerc && deploy_function.py --function my-beautiful-function-name --create-config
+      - run: cd src; pip install --no-cache-dir -r requirements.txt; export LC_ALL=C.UTF-8; export LANG=C.UTF-8; chalice package build; cp build/sam.json template.json; cd ../
+      - run: source ~/.circlerc && deploy_function.py --function my-beautiful-function-name
+
+workflows:
+  version: 2
+  pull-request-branch:
+    jobs:
+      - install-dependencies:
+          context: gousto-beta-aws-app-circleci
+          filters:
+            branches:
+              ignore:
+                - /^env-.*/
+                - develop
+                - master
+      - lint:
+          context: gousto-beta-aws-app-circleci
+          requires:
+            - install-dependencies
+      - test:
+          context: gousto-beta-aws-app-circleci
+          requires:
+            - install-dependencies
+
+  development-environment:
+    jobs:
+      - install-dependencies:
+          context: gousto-beta-aws-app-circleci
+          filters:
+            branches:
+              only:
+                - /^env-.*/
+                - develop
+      - lint:
+          context: gousto-beta-aws-app-circleci
+          requires:
+            - install-dependencies
+      - test:
+          context: gousto-beta-aws-app-circleci
+          requires:
+            - install-dependencies
+      - deploy:
+          context: gousto-beta-aws-app-circleci
+          requires:
+            - test
+            - lint
+
+  production-environment:
+    jobs:
+      - install-dependencies:
+          context: gousto-prod-aws-app-circleci
+          filters:
+            branches:
+              only:
+                - master
+      - lint:
+          context: gousto-prod-aws-app-circleci
+          requires:
+            - install-dependencies
+      - test:
+          context: gousto-prod-aws-app-circleci
+          requires:
+            - install-dependencies
+      - deploy:
+          context: gousto-prod-aws-app-circleci
+          requires:
+            - test
+            - lint

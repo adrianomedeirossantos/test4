@@ -1,0 +1,40 @@
+---
+functionName: my-beautiful-function-name
+region: eu-west-1
+handler: app.handle_lambda_event
+runtime: python3.7
+memorySize: 128
+timeout: 120
+placement: public # Can be 'vpc' (inside private subnets) or 'public' (outside VPC) default is public
+owner: squad-pumpkins
+functionVersion: v2
+
+eventSource: api 
+
+# Uncomment the line below if you want an schedule based lambda function
+# eventSource:
+#   schedule: 0/5 * * * ? *
+
+alarms:
+  messageQueuePeriod: 3600 # 1 hour
+  messageQueueThreshold: 5000
+
+# Uncomment to wire up messages
+# messages:
+#   native: true
+#   consume:
+#     - <consumption queue>
+#   publish:
+#     - <publish queue>
+
+logs:
+  filters:
+    - name: warningCount
+      pattern: "[date, time, dash1, sender, dash2, status=WARNING, ...]"
+      threshold: 20
+    - name: errorCount
+      pattern: "[date, time, dash1, sender, dash2, status=ERROR, ...]"
+      threshold: 1
+    - name: criticalCount
+      pattern: "[date, time, dash1, sender, dash2, status=CRITICAL, ...]"
+      threshold: 0

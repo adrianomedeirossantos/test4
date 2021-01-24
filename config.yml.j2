@@ -1,0 +1,7 @@
+environment: {{ ENVIRONMENT }}
+
+messages:
+  arn: arn:aws:sns:eu-west-1:{{ stacks.defaults.output.accountnumber }}:tpc-{{ ENVIRONMENT }}-message
+  defaults:
+    sender: my-beautiful-function-name
+    actor: my-beautiful-function-name

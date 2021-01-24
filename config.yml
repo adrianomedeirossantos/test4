@@ -1,0 +1,5 @@
+messages:
+  arn: arn:aws:sns:eu-west-1:test:tpc-test
+  defaults:
+    sender: "my-beautiful-function-name"
+    actor: "my-beautiful-function-name"

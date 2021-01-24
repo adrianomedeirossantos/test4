@@ -1,0 +1,20 @@
+-i https://pypi.org/simple
+attrs==19.3.0
+boto3-stubs==1.14.20.0
+boto3==1.13.16
+botocore==1.16.26
+chalice==1.14.1
+click==7.1.2
+docutils==0.15.2
+enum-compat==0.0.3
+git+ssh://git@github.com/Gousto/goustoconfig-python-package.git@840a4d50c9db74d338d587ad71b16f6e9f8d7a88#egg=goustoconfig
+git+ssh://git@github.com/Gousto/goustologger-python-package.git@265e71d3c43fea442c46b9c78dc9c9e2b0f698b1#egg=goustologger
+git+ssh://git@github.com/Gousto/mexanger-python-package.git@bf53e920e055add4b6d641fbce33720aaee603ef#egg=mexanger
+jmespath==0.10.0
+mypy-boto3==1.14.20.0
+python-dateutil==2.8.1
+s3transfer==0.3.3
+six==1.15.0
+typing-extensions==3.7.4.3 ; python_version < '3.8'
+urllib3==1.25.10 ; python_version != '3.4'
+wheel==0.35.1
